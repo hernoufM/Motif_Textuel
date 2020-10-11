@@ -173,30 +173,30 @@ public class Automata {
 
     }
 
-    private Set<Integer> constructStartSet(){
+    private Set<Integer> constructStartSet() {
         Set<Integer> result = new HashSet<>();
         ArrayList<Integer> startStatesList = new ArrayList<>();
-        for(int i=0; i<numberStates(); i++){
+        for (int i = 0; i < numberStates(); i++) {
             if (startStates.get(i))
                 startStatesList.add(i);
         }
-        for(Integer start_state : startStatesList){
+        for (Integer start_state : startStatesList) {
             result.addAll(reduceEpsilonTransitions(start_state));
         }
-        return  result;
+        return result;
     }
 
-    private Set<Integer> reduceEpsilonTransitions(int start_state){
+    private Set<Integer> reduceEpsilonTransitions(int start_state) {
         Set<Integer> result = new HashSet<>();
         result.add(start_state);
         boolean changed = true;
-        while(changed){
-            changed =false;
-            for (Integer state : result){
-                Map<Character,ArrayList<Integer>> transitions = automata.get(state);
-                if(transitions.containsKey(Automata.epsilon)){
-                    for(Integer state_to_add : transitions.get(Automata.epsilon)){
-                        if(!result.contains(state_to_add)){
+        while (changed) {
+            changed = false;
+            for (Integer state : result) {
+                Map<Character, ArrayList<Integer>> transitions = automata.get(state);
+                if (transitions.containsKey(Automata.epsilon)) {
+                    for (Integer state_to_add : transitions.get(Automata.epsilon)) {
+                        if (!result.contains(state_to_add)) {
                             result.add(state_to_add);
                             changed = true;
                         }
@@ -204,34 +204,34 @@ public class Automata {
                 }
             }
         }
-        return  result;
+        return result;
     }
 
-    private static int getNumberSet(ArrayList<Set<Integer>> sets, Set<Integer> set){
-        for(int i =0; i<sets.size(); i++){
-            if(set.equals(sets.get(i)))
-                return  i;
+    private static int getNumberSet(ArrayList<Set<Integer>> sets, Set<Integer> set) {
+        for (int i = 0; i < sets.size(); i++) {
+            if (set.equals(sets.get(i)))
+                return i;
         }
         return -1;
     }
 
-    private boolean isStartSet (Set<Integer> set){
-        for(Integer state : set){
-            if(startStates.get(state))
+    private boolean isStartSet(Set<Integer> set) {
+        for (Integer state : set) {
+            if (startStates.get(state))
                 return true;
         }
         return false;
     }
 
-    private boolean isFinalSet (Set<Integer> set){
-        for(Integer state : set){
-            if(finalStates.get(state))
+    private boolean isFinalSet(Set<Integer> set) {
+        for (Integer state : set) {
+            if (finalStates.get(state))
                 return true;
         }
         return false;
     }
 
-    public static Automata transformToDeterminist(Automata nda){
+    public static Automata transformToDeterminist(Automata nda) {
         Automata result = new Automata();
         ArrayList<Set<Integer>> sets = new ArrayList<>();
         ArrayList<Set<Integer>> workingList = new ArrayList<>();
@@ -239,29 +239,29 @@ public class Automata {
         sets.add(start_set);
         result.addState(nda.isStartSet(start_set), nda.isFinalSet(start_set));
         workingList.add(start_set);
-        while(!workingList.isEmpty()){
+        while (!workingList.isEmpty()) {
             Set<Integer> current_set = workingList.remove(0);
-            for(Integer current_state : current_set){
-                Map<Character,ArrayList<Integer>> transitions = nda.automata.get(current_state);
-                for (Map.Entry<Character,ArrayList<Integer>> entry : transitions.entrySet()) {
-                    if (!entry.getKey().equals(Automata.epsilon)){
+            for (Integer current_state : current_set) {
+                Map<Character, ArrayList<Integer>> transitions = nda.automata.get(current_state);
+                for (Map.Entry<Character, ArrayList<Integer>> entry : transitions.entrySet()) {
+                    if (!entry.getKey().equals(Automata.epsilon)) {
                         char ch = entry.getKey();
                         for (Integer state_to : entry.getValue()) {
                             Set<Integer> set_to = nda.reduceEpsilonTransitions(state_to);
-                            if(getNumberSet(sets,set_to) == -1){
+                            if (getNumberSet(sets, set_to) == -1) {
                                 sets.add(set_to);
                                 workingList.add(set_to);
                                 result.addState(nda.isStartSet(set_to), nda.isFinalSet(set_to));
                             }
-                            if(!result.automata.get(getNumberSet(sets, current_set)).containsValue(ch)){
-                                result.addTransition(ch,getNumberSet(sets, current_set), getNumberSet(sets, set_to));
+                            if (!result.automata.get(getNumberSet(sets, current_set)).containsValue(ch)) {
+                                result.addTransition(ch, getNumberSet(sets, current_set), getNumberSet(sets, set_to));
                             }
                         }
                     }
                 }
             }
         }
-        return  result;
+        return result;
     }
 
 }
