@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.lang.Exception;
 
 public class RegEx {
+    //TODO: modify macros to support + and . and []
+
     //MACROS
     static final int CONCAT = 0xC04CA7;
     static final int ETOILE = 0xE7011E;
@@ -15,14 +17,14 @@ public class RegEx {
     static final int DOT = 0xD07;
 
     //REGEX
-    private static String regEx;
+    public static String regEx;
 
     //CONSTRUCTOR
     public RegEx() {
     }
 
     //MAIN
-    public static void main(String arg[]) {
+    public static RegExTree main(String arg[]) {
         System.out.println("Welcome to Bogota, Mr. Thomas Anderson.");
         if (arg.length != 0) {
             regEx = arg[0];
@@ -42,19 +44,21 @@ public class RegEx {
             System.out.println("].");
             try {
                 RegExTree ret = parse();
-                System.out.println("  >> Tree result: " + ret.toString() + ".");
+                return ret;
+//                System.out.println("  >> Tree result: " + ret.toString() + ".");
             } catch (Exception e) {
                 System.err.println("  >> ERROR: syntax error for regEx \"" + regEx + "\".");
             }
         }
-
-        System.out.println("  >> ...");
-        System.out.println("  >> Parsing completed.");
-        System.out.println("Goodbye Mr. Anderson.");
+        return null;
+//
+//        System.out.println("  >> ...");
+//        System.out.println("  >> Parsing completed.");
+//        System.out.println("Goodbye Mr. Anderson.");
     }
 
     //FROM REGEX TO SYNTAX TREE
-    private static RegExTree parse() throws Exception {
+    public static RegExTree parse() throws Exception {
         //BEGIN DEBUG: set conditionnal to true for debug example
         if (false) throw new Exception();
         RegExTree example = exampleAhoUllman();
