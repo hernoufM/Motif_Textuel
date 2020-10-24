@@ -1,8 +1,17 @@
 import java.util.*;
 
 public class Automata {
+    public ArrayList<Map<Character, ArrayList<Integer>>> getAutomata() {
+        return automata;
+    }
+
     private ArrayList<Map<Character, ArrayList<Integer>>> automata = new ArrayList<>();
     private ArrayList<Boolean> startStates = new ArrayList<>();
+
+    public ArrayList<Boolean> getFinalStates() {
+        return finalStates;
+    }
+
     private ArrayList<Boolean> finalStates = new ArrayList<>();
     private static final Character epsilon = 'ε';
 
@@ -20,7 +29,9 @@ public class Automata {
     public void addTransition(Character ch, int from_state, int to_state) {
         ArrayList<Integer> to_states = automata.get(from_state).get(ch);
         if (to_states != null) {
-            to_states.add(to_state);
+            if (!to_states.contains(to_state)) {
+                to_states.add(to_state);
+            }
         } else {
             to_states = new ArrayList<>();
             to_states.add(to_state);
@@ -39,15 +50,6 @@ public class Automata {
         return result;
     }
 
-    private ArrayList<Integer> getFinalStates() {
-        ArrayList<Integer> result = new ArrayList<>();
-        for (int i = 0; i < finalStates.size(); i++) {
-            if (finalStates.get(i)) {
-                result.add(i);
-            }
-        }
-        return result;
-    }
 
     private Integer getLastStartState() {
         for (int i = startStates.size() - 1; i >= 0; i--) {
@@ -164,11 +166,9 @@ public class Automata {
                 automata.addState(true, false);
                 int final_state_num = automata.numberStates();
                 automata.addState(false, true);
-                for (char ch = 'a'; ch <= 'z'; ch++) {
-                    automata.addTransition(ch, start_state_num, final_state_num);
-                }
-                for (char ch = 'A'; ch <= 'Z'; ch++) {
-                    automata.addTransition(ch, start_state_num, final_state_num);
+                for (char ch = 0; ch <= 255; ch++) {
+                    if (ch != 13 && ch != 10)
+                        automata.addTransition(ch, start_state_num, final_state_num);
                 }
                 break;
             }
@@ -292,13 +292,48 @@ public class Automata {
         if (!transitions1.keySet().equals(transitions2.keySet()))
             return false;
         for (Map.Entry<Character, ArrayList<Integer>> entry : transitions1.entrySet()) {
-            int state_to1 = entry.getValue().get(0);
-            int state_to2 = transitions2.get(entry.getKey()).get(0);
-            if (!(getSetOfState(state_to1, sets) == getSetOfState(state_to2, sets))) {
-                return false;
+            if(entry.getValue().size()==1) {
+                int state_to1 = entry.getValue().get(0);
+                int state_to2 = transitions2.get(entry.getKey()).get(0);
+                if (!(getSetOfState(state_to1, sets) == getSetOfState(state_to2, sets))) {
+                    return false;
+                }
+            }
+            else{
+                ArrayList<Integer> states_to1 = entry.getValue();
+                ArrayList<Integer> states_to2 = transitions2.get(entry.getKey());
+                Set<Integer> sets_num_states_to1 = new HashSet<>();
+                Set<Integer> sets_num_states_to2 = new HashSet<>();
+                for(int state_to : states_to1){
+                    sets_num_states_to1.add(getSetOfState(state_to, sets));
+                }
+                for(int state_to : states_to2){
+                    sets_num_states_to2.add(getSetOfState(state_to, sets));
+                }
+                if(!(sets_num_states_to1.equals(sets_num_states_to2))){
+                    return false;
+                }
             }
         }
         return true;
+    }
+
+
+
+    public void showAuto() {
+        int i = 0;
+        for (Map<Character, ArrayList<Integer>> hm : automata) {
+            System.out.println(i++);
+            for (Map.Entry<Character, ArrayList<Integer>> entry : hm.entrySet()) {
+                System.out.print(entry.getKey());
+                System.out.print("->");
+                for (Integer arrivalState : entry.getValue()) {
+                    System.out.print(arrivalState + " ");
+                }
+                System.out.println();
+            }
+        }
+
     }
 
     public static Automata transformToMinimalist(Automata dfa) {
@@ -315,32 +350,41 @@ public class Automata {
         sets.add(start_set1);
         sets.add(start_set2);
         ArrayList<Set<Integer>> new_sets = new ArrayList<>();
-        for (Set<Integer> current_set : sets) {
-            for (Integer state1 : current_set) {
-                if (getSetOfState(state1, new_sets) == -1) {
-                    Set<Integer> new_set = new HashSet<>();
-                    new_set.add(state1);
-                    for (Integer state2 : current_set) {
-                        if (state1 != state2 && dfa.isEquivalentStates(state1, state2, sets) && getSetOfState(state2, new_sets) == -1) {
-                            new_set.add(state2);
+        while (true) {
+            for (Set<Integer> current_set : sets) {
+                for (Integer state1 : current_set) {
+                    if (getSetOfState(state1, new_sets) == -1) {
+                        Set<Integer> new_set = new HashSet<>();
+                        new_set.add(state1);
+                        for (Integer state2 : current_set) {
+                            if (state1 != state2 && dfa.isEquivalentStates(state1, state2, sets) && getSetOfState(state2, new_sets) == -1) {
+                                new_set.add(state2);
+                            }
                         }
+                        new_sets.add(new_set);
                     }
-                    new_sets.add(new_set);
-                    result.addState(dfa.isStartSet(new_set), dfa.isFinalSet(new_set));
                 }
             }
+            if (sets.size() == new_sets.size()) {
+                break;
+            }
+            sets = new ArrayList<>(new_sets);
+            new_sets.clear();
         }
         for (int i = 0; i < new_sets.size(); i++) {
             Set<Integer> current_set = new_sets.get(i);
             Object state_obj = current_set.toArray()[0];
             Integer state = (Integer) state_obj;
             Map<Character, ArrayList<Integer>> transitions = dfa.automata.get(state);
+            result.addState(dfa.isStartSet(current_set), dfa.isFinalSet(current_set));
             for (Map.Entry<Character, ArrayList<Integer>> entry : transitions.entrySet()) {
-                result.addTransition(entry.getKey(), i, getSetOfState(entry.getValue().get(0), new_sets));
+                for (int state_to : entry.getValue()) {
+                    result.addTransition(entry.getKey(), i, getSetOfState(state_to, new_sets));
+                }
             }
-
         }
         return result;
     }
+
 
 }
