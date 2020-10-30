@@ -9,38 +9,62 @@ import java.util.List;
 
 public class Test {
 
-//    private static int longestProperSuffixPreffix(String word){
-//        int i = 0;
-//        int j = word.length()-1;
-//        int size = 0;
-//        while(j>0){
-//            if(word.substring(0,i+1).equals(word.substring(j))){
-//                size = i+1;
-//            }
-//            i++;
-//            j--;
-//        }
-//        return size;
-//    }
-//
-//    public static int[] constructCarryOver(String regex){
-//        int [] carryOver = new int[regex.length()];
-//        carryOver[0] = -1;
-//        for(int i = 1; i<regex.length(); i++){
-//            carryOver[i] = longestProperSuffixPreffix(regex.substring(0,i));
-//        }
-//        for(int i = 1; i<regex.length(); i++){
-//            if(carryOver[i]==0 && regex.charAt(i) == regex.charAt(0)){
-//                carryOver[i] = -1;
-//            }
-//        }
-//        for(int i = 1; i<regex.length(); i++){
-//            if(carryOver[i]>0 && carryOver[carryOver[i]]==-1){
-//                carryOver[i] = -1;
-//            }
-//        }
-//        return  carryOver;
-//    }
+    public static int[] constructCarryOver(String regex){
+        int [] carryOver = new int[regex.length()];
+        int cnd=0;
+        carryOver[0] = -1;
+        for(int i = 1; i<regex.length(); i++){
+            if(regex.charAt(i) == regex.charAt(cnd))
+            {
+                carryOver[i] = carryOver[cnd];
+            }
+            else
+            {
+                carryOver[i] = cnd;
+                while(cnd>=0 && regex.charAt(i)!=regex.charAt(cnd)){
+                    cnd = carryOver[cnd];
+                }
+            }
+            cnd++;
+        }
+//        carryOver[regex.length()] = cnd;
+        return  carryOver;
+    }
+
+    public static void kmp_algo(String line, String regex, int [] carryOver ){
+        int j=0,i=0;
+        while(i < line.length() && j<regex.length()){
+            if(line.charAt(i) == regex.charAt(j)) {
+                j++;
+                i++;
+            } else {
+                if (carryOver[j] == -1){
+                    j = 0;
+                    i++;
+                }
+                else{
+                    j = carryOver[j];
+                }
+            }
+        }
+        if(j == regex.length()){
+            System.out.println(line);
+        }
+    }
+
+    public static boolean is_Word(String regex){
+        for(int i =0; i<regex.length(); i++){
+            switch (regex.charAt(i)) {
+                case '(': {}
+                case ')': {}
+                case '.': {}
+                case '|': {}
+                case '*': {return  false;}
+                default: {}
+            }
+        }
+        return  true;
+    }
 
     private static class StackElement{
         char ch;
@@ -111,16 +135,31 @@ public class Test {
 
     }
 
+    public static void acceptLinesKMP(String filename, String word, int[] carryOver) {
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(
+                    filename));
+            for (String line : lines) {
+                kmp_algo(line, word, carryOver);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         RegExTree tree = RegEx.main(new String[0]);
-        Automata automata = Automata.transformToNotDeterminist(tree);
-        automata = Automata.transformToDeterminist(automata);
-        automata = Automata.transformToMinimalist(automata);
-        acceptLines(automata,"56667-0.txt");
-//        int[] carryOver = constructCarryOver("abacababc");
-//        for (int i = 0; i<carryOver.length;i++){
-//            System.out.println(carryOver[i]);
-//        }
+        if (is_Word(RegEx.regEx)){
+            int [] carryOver = constructCarryOver(RegEx.regEx);
+            acceptLinesKMP("56667-0.txt",RegEx.regEx,carryOver);
+        }
+        else{
+            Automata automata = Automata.transformToNotDeterminist(tree);
+            automata = Automata.transformToDeterminist(automata);
+            automata = Automata.transformToMinimalist(automata);
+            acceptLines(automata,"56667-0.txt");
+        }
     }
 
 }
