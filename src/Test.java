@@ -131,8 +131,6 @@ public class Test {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public static void acceptLinesKMP(String filename, String word, int[] carryOver) {
