@@ -49,7 +49,6 @@ public class Automata {
         return result;
     }
 
-
     private Integer getLastStartState() {
         for (int i = startStates.size() - 1; i >= 0; i--) {
             if (startStates.get(i))
