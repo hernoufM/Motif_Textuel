@@ -37,7 +37,6 @@ public class Automata {
             to_states.add(to_state);
             automata.get(from_state).put(ch, to_states);
         }
-
     }
 
     private ArrayList<Integer> getStartStates() {
