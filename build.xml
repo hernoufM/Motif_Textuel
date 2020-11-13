@@ -1,0 +1,25 @@
+<project name="Motif_Textuel" basedir="." default="all" >
+
+    <property name="src.dir"     value="src"/>
+    <property name="bin.dir"   value="out/production/Motif_Textuel"/>
+
+    <property name="main-class"  value="Motif_textuel"/>
+
+    <target name="clean">
+        <delete dir="${bin.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${bin.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false"/>
+    </target>
+
+    <target name="run" depends="compile">
+        <java classpath="${bin.dir}" classname="${main-class}">
+            <arg value="${arg0}"/>
+            <arg value="${arg1}"/>
+        </java>
+    </target>
+
+    <target name="all" depends="clean,compile,run" />
+</project>

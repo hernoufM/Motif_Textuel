@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Test {
+public class Motif_textuel {
 
     public static int[] constructCarryOver(String regex){
         int [] carryOver = new int[regex.length()];
@@ -129,7 +129,8 @@ public class Test {
                 acceptLine(line, a);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("ERROR : File not exists");
+            System.exit(1);
         }
     }
 
@@ -142,21 +143,41 @@ public class Test {
                 kmp_algo(line, word, carryOver);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("ERROR : File not exists");
+            System.exit(1);
         }
     }
 
     public static void main(String[] args) {
-        RegExTree tree = RegEx.main(new String[0]);
-        if (is_Word(RegEx.regEx)){
-            int [] carryOver = constructCarryOver(RegEx.regEx);
-            acceptLinesKMP("56667-0.txt",RegEx.regEx,carryOver);
+        if (args.length !=2){
+            for (String s : args){
+                System.out.println(s);
+            }
+            System.err.println("Correct use : motif-textuel [regex] [filename]");
+            return;
+        }
+        String regex = args[0];
+        String filename = args[1];
+        RegExTree tree;
+        if (regex.length() == 0){
+            System.err.println("ERROR : Regex shouldn't be empty");
+            return;
+        }
+        try {
+            tree = RegEx.parse_main(regex);
+        } catch (Exception e) {
+            System.err.println("ERROR: Syntax error for regex \"" + regex + "\".");
+            return;
+        }
+        if (is_Word(regex)){
+            int [] carryOver = constructCarryOver(regex);
+            acceptLinesKMP(filename,regex,carryOver);
         }
         else{
             Automata automata = Automata.transformToNotDeterminist(tree);
             automata = Automata.transformToDeterminist(automata);
             automata = Automata.transformToMinimalist(automata);
-            acceptLines(automata,"56667-0.txt");
+            acceptLines(automata,filename);
         }
     }
 

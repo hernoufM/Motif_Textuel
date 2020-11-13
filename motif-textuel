@@ -1,0 +1,2 @@
+#!/bin/sh
+java -cp out/production/Motif_Textuel Motif_textuel "$1" "$2"

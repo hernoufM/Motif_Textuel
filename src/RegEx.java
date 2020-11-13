@@ -4,66 +4,27 @@ import java.util.ArrayList;
 import java.lang.Exception;
 
 public class RegEx {
-    //TODO: modify macros to support + and . and []
 
-    //MACROS
-    static final int CONCAT = 0xC04CA7;
-    static final int ETOILE = 0xE7011E;
-    static final int ALTERN = 0xA17E54;
-    static final int PROTECTION = 0xBADDAD;
+    static final int CONCAT = 0;
+    static final int ETOILE = 1;
+    static final int ALTERN = 2;
+    static final int PROTECTION = 3;
+    static final int PARENTHESEOUVRANT = 5;
+    static final int PARENTHESEFERMANT = 6;
+    static final int DOT = 7;
 
-    static final int PARENTHESEOUVRANT = 0x16641664;
-    static final int PARENTHESEFERMANT = 0x51515151;
-    static final int DOT = 0xD07;
-
-    //REGEX
     public static String regEx;
 
-    //CONSTRUCTOR
     public RegEx() {
     }
 
-    //MAIN
-    public static RegExTree main(String arg[]) {
-        System.out.println("Welcome to Bogota, Mr. Thomas Anderson.");
-        if (arg.length != 0) {
-            regEx = arg[0];
-        } else {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("  >> Please enter a regEx: ");
-            regEx = scanner.next();
-        }
-        System.out.println("  >> Parsing regEx \"" + regEx + "\".");
-        System.out.println("  >> ...");
-
-        if (regEx.length() < 1) {
-            System.err.println("  >> ERROR: empty regEx.");
-        } else {
-            System.out.print("  >> ASCII codes: [" + (int) regEx.charAt(0));
-            for (int i = 1; i < regEx.length(); i++) System.out.print("," + (int) regEx.charAt(i));
-            System.out.println("].");
-            try {
-                RegExTree ret = parse();
-                return ret;
-//                System.out.println("  >> Tree result: " + ret.toString() + ".");
-            } catch (Exception e) {
-                System.err.println("  >> ERROR: syntax error for regEx \"" + regEx + "\".");
-            }
-        }
-        return null;
-//
-//        System.out.println("  >> ...");
-//        System.out.println("  >> Parsing completed.");
-//        System.out.println("Goodbye Mr. Anderson.");
+    public static RegExTree parse_main(String regex)  throws Exception {
+        regEx = regex;
+        RegExTree ret = parse();
+        return ret;
     }
 
-    //FROM REGEX TO SYNTAX TREE
     public static RegExTree parse() throws Exception {
-        //BEGIN DEBUG: set conditionnal to true for debug example
-        if (false) throw new Exception();
-        RegExTree example = exampleAhoUllman();
-        if (false) return example;
-        //END DEBUG
 
         ArrayList<RegExTree> result = new ArrayList<RegExTree>();
         for (int i = 0; i < regEx.length(); i++)
