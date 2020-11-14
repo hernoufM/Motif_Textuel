@@ -1,57 +1,51 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Classe contenant methode main et des methodes permetant 'matcher' regex avec le texte et afficher le resultat de matching (comme la commande egrep)
+ */
 public class Motif_textuel {
 
-    public static int[] constructCarryOver(String regex){
-        int [] carryOver = new int[regex.length()];
-        int cnd=0;
-        carryOver[0] = -1;
-        for(int i = 1; i<regex.length(); i++){
-            if(regex.charAt(i) == regex.charAt(cnd))
-            {
-                carryOver[i] = carryOver[cnd];
+    /**
+     * Appelle algorithme de matching sur chaque ligne
+     */
+    public static void acceptLines(Automata a, String filename) {
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(
+                    filename));
+            for (String line : lines) {
+                acceptLine(line, a);
             }
-            else
-            {
-                carryOver[i] = cnd;
-                while(cnd>=0 && regex.charAt(i)!=regex.charAt(cnd)){
-                    cnd = carryOver[cnd];
-                }
-            }
-            cnd++;
-        }
-//        carryOver[regex.length()] = cnd;
-        return  carryOver;
-    }
-
-    public static void kmp_algo(String line, String regex, int [] carryOver ){
-        int j=0,i=0;
-        while(i < line.length() && j<regex.length()){
-            if(line.charAt(i) == regex.charAt(j)) {
-                j++;
-                i++;
-            } else {
-                if (carryOver[j] == -1){
-                    j = 0;
-                    i++;
-                }
-                else{
-                    j = carryOver[j];
-                }
-            }
-        }
-        if(j == regex.length()){
-            System.out.println(line);
+        } catch (IOException e) {
+            System.err.println("ERROR : File not exists");
+            System.exit(1);
         }
     }
 
+    /**
+     * Appelle KMP algorithme sur chaque ligne
+     */
+    public static void acceptLinesKMP(String filename, String word) {
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(
+                    filename));
+            for (String line : lines) {
+                Kmp.kmp_algo(line, word);
+            }
+        } catch (IOException e) {
+            System.err.println("ERROR : File not exists");
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Indique si le regex contient que des concatenations
+     */
     public static boolean is_Word(String regex){
         for(int i =0; i<regex.length(); i++){
             switch (regex.charAt(i)) {
@@ -66,12 +60,30 @@ public class Motif_textuel {
         return  true;
     }
 
+    /**
+     * Classe qui represente un element de la pile, qui permet de stocker l'information sur le derniere choix du chemin de matching
+     */
     private static class StackElement{
+        /**
+         * Caractere de matching
+         */
         char ch;
+        /**
+         * Position dans la ligne
+         */
         int char_pos;
+        /**
+         * Numero d'etat au moment de matching
+         */
         int state_num;
+        /**
+         * Le numero du transition choisi
+         */
         int transition_num;
 
+        /**
+         * Constructeur
+         */
         StackElement(char c, int cp, int sn, int tn){
             ch = c;
             char_pos =cp;
@@ -80,6 +92,9 @@ public class Motif_textuel {
         }
     }
 
+    /**
+     * Recherche mot dans une ligne de texte
+     */
     public static void acceptLine(String line, Automata automata) {
         int line_length = line.length();
         for (int i = 0; i < line_length; i++) {
@@ -121,38 +136,11 @@ public class Motif_textuel {
         }
     }
 
-    public static void acceptLines(Automata a, String filename) {
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(
-                    filename));
-            for (String line : lines) {
-                acceptLine(line, a);
-            }
-        } catch (IOException e) {
-            System.err.println("ERROR : File not exists");
-            System.exit(1);
-        }
-    }
-
-    public static void acceptLinesKMP(String filename, String word, int[] carryOver) {
-
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(
-                    filename));
-            for (String line : lines) {
-                kmp_algo(line, word, carryOver);
-            }
-        } catch (IOException e) {
-            System.err.println("ERROR : File not exists");
-            System.exit(1);
-        }
-    }
-
+    /**
+     * Methode main
+     */
     public static void main(String[] args) {
         if (args.length !=2){
-            for (String s : args){
-                System.out.println(s);
-            }
             System.err.println("Correct use : motif-textuel [regex] [filename]");
             return;
         }
@@ -170,8 +158,8 @@ public class Motif_textuel {
             return;
         }
         if (is_Word(regex)){
-            int [] carryOver = constructCarryOver(regex);
-            acceptLinesKMP(filename,regex,carryOver);
+            Kmp.constructCarryOver(regex);
+            acceptLinesKMP(filename,regex);
         }
         else{
             Automata automata = Automata.transformToNotDeterminist(tree);

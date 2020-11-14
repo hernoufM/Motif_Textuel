@@ -1,4 +1,3 @@
-import java.util.Scanner;
 import java.util.ArrayList;
 
 import java.lang.Exception;
@@ -13,11 +12,13 @@ public class RegEx {
     static final int PARENTHESEFERMANT = 6;
     static final int DOT = 7;
 
+    // regex courrant
     public static String regEx;
 
     public RegEx() {
     }
 
+    // Methode static que initialise le regex courrant et retourne l'arbre resultat du parsing
     public static RegExTree parse_main(String regex)  throws Exception {
         regEx = regex;
         RegExTree ret = parse();
@@ -189,24 +190,6 @@ public class RegEx {
         return new RegExTree(tree.root, subTrees);
     }
 
-    //EXAMPLE
-    // --> RegEx from Aho-Ullman book Chap.10 Example 10.25
-    public static RegExTree exampleAhoUllman() {
-        RegExTree a = new RegExTree((int) 'a', new ArrayList<RegExTree>());
-        RegExTree b = new RegExTree((int) 'b', new ArrayList<RegExTree>());
-        RegExTree c = new RegExTree((int) 'c', new ArrayList<RegExTree>());
-        ArrayList<RegExTree> subTrees = new ArrayList<RegExTree>();
-        subTrees.add(c);
-        RegExTree cEtoile = new RegExTree(ETOILE, subTrees);
-        subTrees = new ArrayList<RegExTree>();
-        subTrees.add(b);
-        subTrees.add(cEtoile);
-        RegExTree dotBCEtoile = new RegExTree(CONCAT, subTrees);
-        subTrees = new ArrayList<RegExTree>();
-        subTrees.add(a);
-        subTrees.add(dotBCEtoile);
-        return new RegExTree(ALTERN, subTrees);
-    }
 }
 
 //UTILITARY CLASS

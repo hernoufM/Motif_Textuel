@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
-echo "" > result.csv
+
+book=books/war_peace.txt
+regexs=test/words_sorted.txt
+result=result_war_peace_kmp.csv
+
+echo "" > $result
 
 while read regex;
 do
   time_start_mt=$(($(date +%s%N)/1000000))
-  ./motif-textuel "$regex" books/war_peace.txt > /dev/null
+  ./motif-textuel "$regex" $book > /dev/null
   time_end_mt=$(($(date +%s%N)/1000000))
   time_start_egrep=$(($(date +%s%N)/1000000))
-  egrep "$regex" books/war_peace.txt > /dev/null
+  egrep "$regex" $book > /dev/null
   time_end_egrep=$(($(date +%s%N)/1000000))
-  echo "$regex, $((time_end_egrep-time_start_egrep)), $((time_end_mt-time_start_mt))">> result.csv
-done < test-regexs.txt
+  echo "$((time_end_egrep-time_start_egrep)), $((time_end_mt-time_start_mt))">> $result
+done < $regexs

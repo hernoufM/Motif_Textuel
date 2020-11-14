@@ -1,31 +1,63 @@
 import java.util.*;
 
+/**
+ * Classe qui represente l'automate.
+ */
 public class Automata {
-    public ArrayList<Map<Character, ArrayList<Integer>>> getAutomata() {
-        return automata;
-    }
 
+    /**
+     * Automate. L'indice de la liste represente l'etat, et son elements represente ses transitions
+      */
     private ArrayList<Map<Character, ArrayList<Integer>>> automata = new ArrayList<>();
+
+    /**
+     * La liste des booleens, l'indice represente l'etat et son elements dit si cet etat est un etat initial
+     */
     private ArrayList<Boolean> startStates = new ArrayList<>();
 
-    public ArrayList<Boolean> getFinalStates() {
-        return finalStates;
-    }
-
+    /**
+     * La liste des booleens, l'indice represente l'etat et son elements dit si cet etat est un etat finale
+      */
     private ArrayList<Boolean> finalStates = new ArrayList<>();
+
+    /**
+     * Epsilon
+     */
     private static final Character epsilon = 'ε';
 
-
+    /**
+     * Returne le nombre d'etat dans automate
+     */
     public int numberStates() {
         return automata.size();
     }
 
+    /**
+     * returne attribut finalStates
+     */
+    public ArrayList<Boolean> getFinalStates() {
+        return finalStates;
+    }
+
+    /**
+     * returne attribut automata
+     */
+    public ArrayList<Map<Character, ArrayList<Integer>>> getAutomata() {
+        return automata;
+    }
+
+    /**
+     * Ajoute un etat dans automate en indiquant si l'etat est finale ou initiale
+     */
     public void addState(boolean isStartState, boolean isFinalState) {
         automata.add(new HashMap<>());
         startStates.add(isStartState);
         finalStates.add(isFinalState);
     }
 
+    /**
+     * Ajoute une transition entre deux etats
+     */
     public void addTransition(Character ch, int from_state, int to_state) {
         ArrayList<Integer> to_states = automata.get(from_state).get(ch);
         if (to_states != null) {
@@ -39,16 +71,9 @@ public class Automata {
         }
     }
 
-    private ArrayList<Integer> getStartStates() {
-        ArrayList<Integer> result = new ArrayList<>();
-        for (int i = 0; i < startStates.size(); i++) {
-            if (startStates.get(i)) {
-                result.add(i);
-            }
-        }
-        return result;
-    }
-
+    /**
+     * Retourne derniere etat initale
+     */
     private Integer getLastStartState() {
         for (int i = startStates.size() - 1; i >= 0; i--) {
             if (startStates.get(i))
@@ -57,6 +82,9 @@ public class Automata {
         return null;
     }
 
+    /**
+     * Retourne derniere etat finale
+     */
     private Integer getLastFinalState() {
         for (int i = finalStates.size() - 1; i >= 0; i--) {
             if (finalStates.get(i))
@@ -65,6 +93,9 @@ public class Automata {
         return null;
     }
 
+    /**
+     * Retourne avant derniere etat initiale
+     */
     private Integer getBeforeLastStartState() {
         boolean beforeLast = false;
         for (int i = startStates.size() - 1; i >= 0; i--) {
@@ -78,6 +109,9 @@ public class Automata {
         return null;
     }
 
+    /**
+     * Retourne avant derniere etat final
+     */
     private Integer getBeforeLastFinalState() {
         boolean beforeLast = false;
         for (int i = finalStates.size() - 1; i >= 0; i--) {
@@ -91,12 +125,18 @@ public class Automata {
         return null;
     }
 
+    /**
+     * Methode qui crée et retourne un automate à partir d'un tree et
+     */
     public static Automata transformToNotDeterminist(RegExTree tree) {
         Automata result = new Automata();
         transformation1(result, tree);
         return result;
     }
 
+    /**
+     * Methode permettant de construire un automate par recurssion sur tree
+     */
     private static void transformation1(Automata automata, RegExTree tree) {
         switch (tree.root) {
             case RegEx.ALTERN: {
@@ -181,6 +221,9 @@ public class Automata {
 
     }
 
+    /**
+     * Construction d'ensemble initial d'etats pour la transoforamtion vers automate deterministe
+     */
     private Set<Integer> constructStartSet() {
         Set<Integer> result = new HashSet<>();
         ArrayList<Integer> startStatesList = new ArrayList<>();
@@ -194,7 +237,9 @@ public class Automata {
         return result;
     }
 
-    // TODO: working list
+    /**
+     * Retourne un ensemble d'etat dont on peut attiendre en partant d'un etat que avec epsilon transitions
+     */
     private Set<Integer> reduceEpsilonTransitions(int start_state) {
         Set<Integer> result = new HashSet<>();
         result.add(start_state);
@@ -219,6 +264,9 @@ public class Automata {
         return result;
     }
 
+    /**
+     * Retourne indice d'un ensemble dans la liste des ensembles. Si l'ensemble n'est pas present dans la liste on retourne -1
+     */
     private static int getNumberSet(ArrayList<Set<Integer>> sets, Set<Integer> set) {
         for (int i = 0; i < sets.size(); i++) {
             if (set.equals(sets.get(i)))
@@ -227,6 +275,9 @@ public class Automata {
         return -1;
     }
 
+    /**
+     * Dit si l'ensmeble contient au moins un etat initiale
+     */
     private boolean isStartSet(Set<Integer> set) {
         for (Integer state : set) {
             if (startStates.get(state))
@@ -235,6 +286,9 @@ public class Automata {
         return false;
     }
 
+    /**
+     * Dit si l'ensmeble contient au moins un etat finale
+     */
     private boolean isFinalSet(Set<Integer> set) {
         for (Integer state : set) {
             if (finalStates.get(state))
@@ -243,6 +297,9 @@ public class Automata {
         return false;
     }
 
+    /**
+     * Methode qui transforme un NDFA to DFA
+     */
     public static Automata transformToDeterminist(Automata ndfa) {
         Automata result = new Automata();
         ArrayList<Set<Integer>> sets = new ArrayList<>();
@@ -276,6 +333,9 @@ public class Automata {
         return result;
     }
 
+    /**
+     * Retourne le numero d'un ensemble qui contient etat specifié dans la liste des ensembles
+     */
     private static int getSetOfState(int state, ArrayList<Set<Integer>> sets) {
         for (int i = 0; i < sets.size(); i++) {
             if (sets.get(i).contains(state))
@@ -284,6 +344,9 @@ public class Automata {
         return -1;
     }
 
+    /**
+     * Indique si deux etats sont equivalent en partant d'un liste des ensembles
+     */
     private boolean isEquivalentStates(int state1, int state2, ArrayList<Set<Integer>> sets) {
         Map<Character, ArrayList<Integer>> transitions1 = automata.get(state1);
         Map<Character, ArrayList<Integer>> transitions2 = automata.get(state2);
@@ -316,24 +379,9 @@ public class Automata {
         return true;
     }
 
-
-
-    public void showAuto() {
-        int i = 0;
-        for (Map<Character, ArrayList<Integer>> hm : automata) {
-            System.out.println(i++);
-            for (Map.Entry<Character, ArrayList<Integer>> entry : hm.entrySet()) {
-                System.out.print(entry.getKey());
-                System.out.print("->");
-                for (Integer arrivalState : entry.getValue()) {
-                    System.out.print(arrivalState + " ");
-                }
-                System.out.println();
-            }
-        }
-
-    }
-
+    /**
+     * Transformation d'un automate DFA vers automate minimaliste.
+     */
     public static Automata transformToMinimalist(Automata dfa) {
         Automata result = new Automata();
         ArrayList<Set<Integer>> sets = new ArrayList<>();
@@ -383,6 +431,5 @@ public class Automata {
         }
         return result;
     }
-
 
 }
